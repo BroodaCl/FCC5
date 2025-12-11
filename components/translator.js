@@ -21,18 +21,29 @@ class Translator {
    */
   replaceAll(text, matchesMap) {
     let tempText = text;
-    // Ordenar por longitud descendente para que las frases largas tengan prioridad (Ej: 'car boot sale' antes que 'car')
+    // Ordenar por longitud descendente para que las frases largas tengan prioridad
     const sortedKeys = Object.keys(matchesMap).sort((a, b) => b.length - a.length);
 
     sortedKeys.forEach(key => {
-      // RegEx para buscar la palabra completa, respetando espacios o puntuación antes/después
+      // RegEx para buscar la palabra completa o frase, respetando espacios o puntuación
+      // Usa lookarounds (?<=) y (?=) para asegurar que es un límite de palabra
       const regex = new RegExp(`(?<=^|[\\s.,!?;])${key}(?=[\\s.,!?;]|$)`, 'gi');
       
       if (regex.test(tempText)) {
          const translation = matchesMap[key];
          const replacement = `<span class="highlight">${translation}</span>`;
          
-         tempText = tempText.replace(regex, replacement);
+         // Usa una función de reemplazo para mantener las mayúsculas/minúsculas de la primera letra si está al inicio de la oración
+         tempText = tempText.replace(regex, (match) => {
+             const isStartOfSentence = (match.trim() === key && match.charAt(0) === match.charAt(0).toUpperCase());
+             
+             let finalTranslation = translation;
+             if (isStartOfSentence) {
+                 finalTranslation = finalTranslation.charAt(0).toUpperCase() + finalTranslation.slice(1);
+             }
+
+             return `<span class="highlight">${finalTranslation}</span>`;
+         });
       }
     });
     return tempText;
@@ -45,14 +56,15 @@ class Translator {
       let result = text;
       
       Object.keys(titlesMap).forEach(titleKey => {
-          // Expresión regular para buscar el título seguido de un espacio o fin de texto.
+          // Busca el título seguido de un espacio o fin de texto.
+          // Ej: busca "mr." o "dr"
           const regex = new RegExp(`(${titleKey})(?=\\s|$)`, 'gi');
           
           result = result.replace(regex, (match, p1) => {
-              // p1 es el título coincidente (Ej: Mr.). Lo convertimos a minúsculas para buscar en el mapa.
+              // p1 es el título coincidente. Lo usamos para buscar en el mapa (en minúsculas).
               const translatedTitle = titlesMap[p1.toLowerCase()];
               
-              // Capitalizar la primera letra de la traducción (Ej: 'dr' -> 'Dr')
+              // Capitalizar la primera letra de la traducción (Ej: 'dr.' -> 'Dr.')
               const capitalizedTranslation = translatedTitle.charAt(0).toUpperCase() + translatedTitle.slice(1);
               
               // Devolver la traducción envuelta en <span>
@@ -78,7 +90,6 @@ class Translator {
 
 
   translate(text, locale) {
-    // Diccionarios temporales según el sentido de la traducción
     let dictSpelling, dictTitles, dictOnly;
 
     if (locale === 'american-to-british') {
@@ -90,9 +101,7 @@ class Translator {
       dictSpelling = this.britishToAmericanSpelling;
       dictTitles = this.britishToAmericanTitles;
       dictOnly = britishOnly;
-    } else {
-      return null; // Locale inválido (manejado en /api/translate)
-    }
+    } 
 
     let translatedText = text;
 
@@ -103,15 +112,14 @@ class Translator {
     translatedText = this.handleTime(translatedText, locale);
 
     // 3. Traducir Ortografía y Palabras Únicas
-    // Combinamos ambos diccionarios para buscar
     const combinedWords = { ...dictSpelling, ...dictOnly };
-    // NOTA: 'combinedWords' debe ser un diccionario de minúsculas
+    
+    // Aseguramos que las claves de búsqueda sean minúsculas para un reemplazo consistente
     const lowerCombinedWords = Object.keys(combinedWords).reduce((acc, key) => {
         acc[key.toLowerCase()] = combinedWords[key];
         return acc;
     }, {});
     
-    // Convertimos a minúsculas antes de buscar y reemplazar
     translatedText = this.replaceAll(translatedText, lowerCombinedWords);
 
     return translatedText;
