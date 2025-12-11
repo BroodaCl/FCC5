@@ -49,7 +49,7 @@ app.listen(portNum, () => {
         console.log('Tests are not valid:');
         console.error(error);
       }
-    }, 5000); // <-- AUMENTO A 5000ms
+    }, 10000); // <-- AUMENTO A 5000ms
   }
 });
 
