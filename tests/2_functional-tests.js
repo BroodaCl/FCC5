@@ -7,6 +7,7 @@ chai.use(chaiHttp);
 
 suite('Functional Tests', () => {
 
+  // 2. Translation with text and locale fields: POST request to /api/translate
   test('Translation with text and locale fields: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
@@ -15,10 +16,12 @@ suite('Functional Tests', () => {
         assert.equal(res.status, 200);
         assert.equal(res.body.text, 'Mangoes are my favorite fruit.');
         assert.include(res.body.translation, 'favourite');
+        assert.include(res.body.translation, '<span class="highlight">'); // Check for highlight
         done();
       });
   });
 
+  // Translation with text and invalid locale field
   test('Translation with text and invalid locale field: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
@@ -30,6 +33,7 @@ suite('Functional Tests', () => {
       });
   });
 
+  // 6. Translation with missing text field
   test('Translation with missing text field: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
@@ -41,6 +45,7 @@ suite('Functional Tests', () => {
       });
   });
 
+  // Translation with missing locale field
   test('Translation with missing locale field: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
@@ -52,10 +57,11 @@ suite('Functional Tests', () => {
       });
   });
 
+  // 7. Translation with empty text
   test('Translation with empty text: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
-      .send({ text: '', locale: 'american-to-british' })
+      .send({ text: '  ', locale: 'american-to-british' }) // Usamos '  ' para asegurar que trim() funcione
       .end((err, res) => {
         assert.equal(res.status, 200);
         assert.equal(res.body.error, 'No text to translate');
@@ -63,10 +69,11 @@ suite('Functional Tests', () => {
       });
   });
 
+  // 9. Translation with text that needs no translation
   test('Translation with text that needs no translation: POST request to /api/translate', (done) => {
     chai.request(server)
       .post('/api/translate')
-      .send({ text: 'SaintPeter andnh', locale: 'american-to-british' })
+      .send({ text: 'Hello, I am a test sentence.', locale: 'american-to-british' })
       .end((err, res) => {
         assert.equal(res.status, 200);
         assert.equal(res.body.translation, 'Everything looks good to me!');

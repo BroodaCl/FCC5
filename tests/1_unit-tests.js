@@ -60,21 +60,21 @@ suite('Unit Tests', () => {
     test('Translate No Mr. Bond, I expect you to die.', (done) => {
       const input = 'No Mr. Bond, I expect you to die.';
       const output = translator.translate(input, 'american-to-british');
-      assert.include(output, 'Mr'); // Sin punto
+      assert.include(output, '<span class="highlight">Mr</span>');
       done();
     });
 
     test('Translate Dr. Grosh will see you now.', (done) => {
       const input = 'Dr. Grosh will see you now.';
       const output = translator.translate(input, 'american-to-british');
-      assert.include(output, 'Dr'); // Sin punto
+      assert.include(output, '<span class="highlight">Dr</span>');
       done();
     });
 
     test('Translate Lunch is at 12:15 today.', (done) => {
       const input = 'Lunch is at 12:15 today.';
       const output = translator.translate(input, 'american-to-british');
-      assert.include(output, '12.15');
+      assert.include(output, '<span class="highlight">12.15</span>');
       done();
     });
   });
@@ -136,21 +136,21 @@ suite('Unit Tests', () => {
     test('Translate Have you met Mrs Kalyani?', (done) => {
       const input = 'Have you met Mrs Kalyani?';
       const output = translator.translate(input, 'british-to-american');
-      assert.include(output, 'Mrs.');
+      assert.include(output, '<span class="highlight">Mrs.</span>');
       done();
     });
 
     test("Translate Prof Joyner of King's College, London.", (done) => {
       const input = "Prof Joyner of King's College, London.";
       const output = translator.translate(input, 'british-to-american');
-      assert.include(output, 'Prof.');
+      assert.include(output, '<span class="highlight">Prof.</span>');
       done();
     });
 
     test('Translate Tea time is usually around 4 or 4.30.', (done) => {
       const input = 'Tea time is usually around 4 or 4.30.';
       const output = translator.translate(input, 'british-to-american');
-      assert.include(output, '4:30');
+      assert.include(output, '<span class="highlight">4:30</span>');
       done();
     });
   });
